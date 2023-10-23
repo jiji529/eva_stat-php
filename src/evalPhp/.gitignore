@@ -1,2 +1,2 @@
-/log/
-/lock/
+/log/*.log
+/lock/lock-*
