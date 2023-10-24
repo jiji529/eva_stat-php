@@ -36,5 +36,13 @@ if($success) {
 		//	$linkUrlBase = "http://localhost/admin/adminLoginFromEval.do?token=";
 		$result['tgtUrl'] = $linkUrlBase.$tokenRet['token'];
 	}
+	// 토큰정보 가져오기 실패의 경우
+	else {
+	    // API 호출은 성공했으나 결과가 실패일때 / 메시지 전송
+	    if($tokenRet) {
+	       $result['errMsg'] = $tokenRet['msg'];
+	    }
+	    $result['success'] = false;
+	}
 }
 echo json_encode($result);
