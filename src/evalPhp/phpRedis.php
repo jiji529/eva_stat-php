@@ -6,7 +6,7 @@
  */
 /* Session Env */
 ini_set('session.save_handler', 'redis');
-ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr');
+ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr:6379');
 
 session_cache_expire(14400);
 
