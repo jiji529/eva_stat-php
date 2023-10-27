@@ -66,7 +66,6 @@ if (!empty($premiumID)) {
     $data['pid'] = $premiumID;
     $data['regDate'] = $now_date;
     $data['peUser'] = $_SESSION['PE_USER'];
-    $data['token'] = $_SESSION['TEST'];
 
     $path = "https://".$premiumID.".scrapmaster.co.kr";
     $domain = @get_headers($path);
