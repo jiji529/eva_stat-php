@@ -50,16 +50,32 @@ window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 
  - mcrypt
  
-	php 버전이 7.3으로 변경되면서 기존 mcrypt_decrypt() 함수 사용에 제약이 생김.
-	php 호환이 되는 mcrypt 라이브러리는 ver 1.0.4를 사용해야하며,
-	php.ini 설정에서
-	CODE: error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED
-	위 내용을 추가해야 함.
-	(참고 : https://pecl.php.net/get/mcrypt-1.0.4.tgz)
+	- (현)php 7.3과 호환이 되는 mcrypt 1.0.4를 사용해야 함.
+	
+	- Windows 10 (개발)
+		* Download: https://windows.php.net/downloads/pecl/releases/mcrypt/1.0.4/php_mcrypt-1.0.4-7.3-ts-vc15-x64.zip
+		* ../php73 > ext > php_mcrypt.dll 파일추가.
+		* ../php73 > php.ini 
+			> error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED 코드추가.
+			> extension = php_mcrypt.dll 코드추가
+	- Linux (배포)
+		* Download: https://pecl.php.net/get/mcrypt-1.0.4.tgz
+		* 수동설치 / 패키지설치 : -
+		
 	
  - redis
  
-	Token을 암호화/복호화하여 인증처리 방식에서 PHPRedis를 사용한 php session 방식으로 전환.
-	PhpRedis는 ver 5.3.5를 사용하고 Redis의 경로(url) 변경 시, 
-	phpRedis.php에서 "session.save_path" 경로를 수정해야 된다.
-	(참고 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
+	- (현)php 7.3과 호환이 되는 PHPRedis 5.3.5를 사용해야 함.
+	  (Token을 암호화/복호화하여 인증처리 방식에서 PHPRedis를 사용한 php session 방식으로 전환하여 필요.)
+	
+	- Windows 10 (개발)
+		* ../php73 > ext > php_redis.dll 파일추가.
+		* ../php73 > php.ini
+			> extension = php_redis.dll 코드추가.
+		* ../evalPhp/phpRedis.php
+			> ini_set(redis 관련 내용 추가) 코드추가 (Redis접속 URL 변경시 확인 필요).
+	
+	- Linux (배포)
+		* 
+		
+	- 참고 자료 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
