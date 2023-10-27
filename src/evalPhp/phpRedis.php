@@ -6,9 +6,11 @@
  */
 /* Session Env */
 ini_set('session.save_handler', 'redis');
+/* 유효하지 않은 세션을 자동 삭제할 시간(s) (memory, db, storage) */
+ini_set('session.gc_maxlifetime', 43200); 
 ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr:6379');
 
-session_cache_expire(14400);
+session_cache_expire(720); // 서버측 유효시간 (m)
 
 /* 세션 생성 및 선언 */
 session_start();
