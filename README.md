@@ -23,7 +23,7 @@ Apache Version : 2.4.53
 
  - 실행
 
-	dev_env/start.bat 실행
+	dev_env/startup.bat 실행
 	 : 실행시 까만 콘솔창이 팝업됨
 	 : 종료하려면 해당 콘솔창 선택 해 Ctrl-c 입력 (어떠한 방식이건 창을 닫으면 종료됨)
 	주의 : 다른 프로세스가 지정한 포트를 사용하고 있으면 안됨
