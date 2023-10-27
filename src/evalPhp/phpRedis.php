@@ -24,7 +24,7 @@ function setRedisSessionData($params) {
     }
     
     /* set timeout = 1 hour */
-    if (!isset($_SESSION['EMBEDDED']) || $_SESSION['EMBEDDED'] == null) {
+    if (isset($_SESSION['EMBEDDED']) || $_SESSION['EMBEDDED'] != null) {
         $_SESSION['LIFE_TIME'] = 14400;
         /* Pre-2023 code */
         // $DahamiToken->setExp(512640); // exp:minutes
@@ -49,7 +49,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) && isset($_SESSION['LIFE_TIME'])
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
-/* set $uid and $premiumID */
+/* Set $uid and $premiumID */
 if (isset($_SESSION['USER_ID']) && isset($_SESSION['PREMIUM_ID'])) {
     /**
      * <pre> *.php에서 $premiumID를 사용하기 위함이다. </pre>
