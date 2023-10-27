@@ -76,6 +76,6 @@ window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 			> ini_set(redis 관련 내용 추가) 코드추가 (Redis접속 URL 변경시 확인 필요).
 	
 	- Linux (배포)
-		* 
+		* Download: 
 		
 	- 참고 자료 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
