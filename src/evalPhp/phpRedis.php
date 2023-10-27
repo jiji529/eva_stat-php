@@ -27,7 +27,7 @@ function setRedisSessionData($params) {
     
     /* set timeout = 1 hour */
     if (isset($_SESSION['EMBEDDED']) || $_SESSION['EMBEDDED'] != null) {
-        $_SESSION['LIFE_TIME'] = 14400;
+        $_SESSION['LIFE_TIME'] = 43200;
         /* Pre-2023 code */
         // $DahamiToken->setExp(512640); // exp:minutes
     } else {
