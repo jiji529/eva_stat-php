@@ -44,4 +44,22 @@ eclipse --> Help(top menu) --> eclipse marketplace --> search: php --> install <
 window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 --> executable path [Browser] butten --> ../premium_eval-phpAPI/env/php73/php.exe <br />
 --> Finish --> *.php 파일에 focus를 두고 Run as --> CLI or Web 으로 실행하기.
+	
 
+## 배포시 참고사항
+
+ - mcrypt
+ 
+	php 버전이 7.3으로 변경되면서 기존 mcrypt_decrypt() 함수 사용에 제약이 생김.
+	php 호환이 되는 mcrypt 라이브러리는 ver 1.0.4를 사용해야하며,
+	php.ini 설정에서
+	CODE: error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED
+	위 내용을 추가해야 함.
+	(참고 : https://pecl.php.net/get/mcrypt-1.0.4.tgz)
+	
+ - redis
+ 
+	Token을 암호화/복호화하여 인증처리 방식에서 PHPRedis를 사용한 php session 방식으로 전환.
+	PhpRedis는 ver 5.3.5를 사용하고 Redis의 경로(url) 변경 시, 
+	phpRedis.php에서 "session.save_path" 경로를 수정해야 된다.
+	(참고 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
