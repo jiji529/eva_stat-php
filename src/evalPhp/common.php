@@ -5,49 +5,17 @@
  * Date: 2018-10-30
  * Time: 오전 11:57
  */
-//header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Authorization');
-header('Content-Type: application/json');
 include_once __DIR__ . '/responseHeader.php';
-include_once(__DIR__ . '/lib/DahamiToken.php');
+include_once __DIR__ . '/phpRedis.php';
 
-$now_time = time();
-$DahamiToken = new DahamiToken();
-$headerAuth = $DahamiToken->getHeaderAuth();
-$success = false;
-$message = '회원 정보를 찾을 수 없습니다.';
-
-if ($headerAuth !== null) {
-    $headerData = $DahamiToken->getData($headerAuth);
-    $auth_check = true;
-    logs('common.curtime : ' . microtime());
-    logs('common.header : ' . json_encode($headerData));
-    if ($headerData) {
-        if ($headerData->exp < $now_time) {
-            $auth_check = false;
-            $message = '세션 기간이 만료되었습니다.';
-        }
-        if ($headerData->claims->_SERVER_IP !== $_SERVER['REMOTE_ADDR']) {
-            $auth_check = false;
-            $message = '접속 정보가 변경되었습니다.';
-        }
-        if ($headerData->claims->_AGENT !== $_SERVER['HTTP_USER_AGENT']) {
-            $auth_check = false;
-            $message = '접속 정보가 변경되었습니다.';
-        }
-        if ($auth_check) {
-            $uid = $headerData->claims->_USER_ID;
-            $premiumID = $headerData->claims->_PREMIUM_ID;
-        }
-    }
-}
-//$premiumID = 'pierrotss'; //임시 개발용
-if (!$premiumID) {
-    $result['success'] = $success;
+$message = '유효하지 않은 접근입니다.';
+if (diffHttpUserAgent()) {
+    $result['success'] = false;
     $result['message'] = $message;
     $result['notice_code'] = 'E001';
     $result['notice_message'] = $message;
-    $result['data'] = $data;
+    $result['data'] = [];
     echo json_encode($result);
     exit;
 }
@@ -72,7 +40,7 @@ function logs($msg) {
     }
 
     $datetime = date("ymd_His");
-    $output = '[' . $datetime . '] {' . $_SERVER['REMOTE_ADDR'] . '} ' . $msg . PHP_EOL . PHP_EOL;
+    $output = '[' . $datetime . ']' . $msg . PHP_EOL . PHP_EOL;
 
     file_put_contents($filename, $output, FILE_APPEND);
 }

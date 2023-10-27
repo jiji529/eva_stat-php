@@ -5,52 +5,21 @@
  * Date: 2018-10-26
  * Time: 오후 3:10
  */
-header('Content-Type: application/json');
 include_once __DIR__ . '/responseHeader.php';
 include_once __DIR__ . '/ClassStat.php';
-include_once __DIR__ . '/lib/DahamiToken.php';
+include_once __DIR__ . '/phpRedis.php';
 
 //request
 if (isset($_POST['uid'])) $uid = $_POST['uid'];
 if (isset($_POST['password'])) $txtPass = $_POST['password'];
 if (isset($_POST['auth'])) $headerAuth = $_POST['auth']; 
 
-
 //default setting
 $success = false;
 $data = array();
 
-//token
-$DahamiToken = new DahamiToken();
-
 $now_date = date('YmdHis');
 $now_time = time();
-
-if (isset($headerAuth) && $headerAuth !== null) {
-    $headerData = substr($headerAuth, 20, -20);
-
-    $headerData = base64_decode($headerData);
-
-    $headerData = explode('&', $headerData);
-
-    $exp = explode('=', $headerData[0]);
-    $exp = $exp[1];
-    $user_id= explode('=', $headerData[1]);
-    $user_id = $user_id[1];
-    $premium_id = explode('=', $headerData[2]);
-    $premium_id = $premium_id[1];
-
-    $auth_check = true;
-    if($headerData){
-        if ($exp + (60*60) < $now_time) {
-            $auth_check = false;
-        }
-        if ($auth_check) {
-            $uid = $user_id;
-            $premiumID = $premium_id;
-        }
-    }
-}
 
 $versionStat = '';
 if (isset($uid) && isset($txtPass)) {
@@ -84,20 +53,20 @@ if (!empty($premiumID)) {
     $db->defaultCreateTable();
 
     $session_data = array(
-        "_USER_ID" => $uid,
-        "_PREMIUM_ID" => $premiumID,
-        "_AGENT" => $_SERVER['HTTP_USER_AGENT'],
-        "_SERVER_IP" => $_SERVER['REMOTE_ADDR'],
-        "_PE_USER" => (intval($versionStat) > 1) ? true : false
+        "USER_ID" => $uid,
+        "PREMIUM_ID" => $premiumID,
+        "AGENT" => $_SERVER['HTTP_USER_AGENT'],
+        "PE_USER" => (intval($versionStat) > 1) ? true : false
     );
-
-    $DahamiToken->setData($session_data);
-    $token = $DahamiToken->getToken();
-    $data['accessToken'] = $token;
-    $data['uid'] = $uid;
+    
+    /******************** Redis ********************/
+    setRedisSessionData($session_data);
+    
+    $data['uid'] = $_SESSION['USER_ID'];
     $data['pid'] = $premiumID;
     $data['regDate'] = $now_date;
-    $data['peUser'] = (intval($versionStat) > 1) ? true : false;
+    $data['peUser'] = $_SESSION['PE_USER'];
+    $data['token'] = $_SESSION['TEST'];
 
     $path = "https://".$premiumID.".scrapmaster.co.kr";
     $domain = @get_headers($path);

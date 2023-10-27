@@ -5,18 +5,18 @@
  * Created by IntelliJ IDEA.
  * User: tealight
  * Date: 2018-10-26
- * Time: 오후 3:10
+ * Time: �삤�썑 3:10
  */
 header('Content-Type: application/json');
-
+include_once __DIR__ . '/responseHeader.php';
 include_once __DIR__ . '/ClassStat.php';
-include_once __DIR__ . '/lib/DahamiToken.php';
+include_once __DIR__ . '/phpRedis.php';
 
 //request
 $_3DES_KEY = 'dAHamIdAHamIdAHamIdAHamI';
 $ev = $_POST['ev'];
 $ev_decrypted = decrypt($ev, $_3DES_KEY);
-$ev_arr = explode('#', $ev_decrypted);
+$ev_arr = explode('#', $ev_decrypted); // decode된 것을 '#'으로 쪼개기
 if (count($ev_arr) === 3) {
   $ev_dt = $ev_arr[0];
   $ev_id = $ev_arr[1];
@@ -27,43 +27,12 @@ if (count($ev_arr) === 3) {
 
 $uid = $ev_id;
 $txtPass = $ev_pw;
-$headerAuth = $_POST['auth'];
 
 //default setting
 $success = false;
 $data = array();
 
-//token
-$DahamiToken = new DahamiToken();
-
 $now_date = date('YmdHis');
-$now_time = time();
-
-if ($headerAuth !== null) {
-    $headerData = substr($headerAuth, 20, -20);
-
-    $headerData = base64_decode($headerData);
-
-    $headerData = explode('&', $headerData);
-
-    $exp = explode('=', $headerData[0]);
-    $exp = $exp[1];
-    $user_id= explode('=', $headerData[1]);
-    $user_id = $user_id[1];
-    $premium_id = explode('=', $headerData[2]);
-    $premium_id = $premium_id[1];
-
-    $auth_check = true;
-    if($headerData){
-        if ($exp + (60*60) < $now_time) {
-            $auth_check = false;
-        }
-        if ($auth_check) {
-            $uid = $user_id;
-            $premiumID = $premium_id;
-        }
-    }
-}
 
 if ($uid && $txtPass) {
     $sm3_db = new MySQL(true, 'sm3_service', 'sm3.scrapmaster.co.kr', 'mangne83', 'mangne83','utf8');
@@ -96,17 +65,16 @@ if ($premiumID) {
     $db->defaultCreateTable();
 
     $session_data = array(
-        "_USER_ID" => $uid,
-        "_PREMIUM_ID" => $premiumID,
-        "_AGENT" => $_SERVER['HTTP_USER_AGENT'],
-        "_SERVER_IP" => $_SERVER['REMOTE_ADDR'],
-        "_PE_USER" => (intval($versionStat) > 1) ? true : false,
-        '_EMBEDDED' => 'DAHAMI_SCRAPMASTER_NATIVE_APP'
+        "USER_ID" => $uid,
+        "PREMIUM_ID" => $premiumID,
+        "AGENT" => $_SERVER['HTTP_USER_AGENT'],
+        "PE_USER" => (intval($versionStat) > 1) ? true : false,
+        'EMBEDDED' => 'DAHAMI_SCRAPMASTER_NATIVE_APP'
     );
 
-    $DahamiToken->setData($session_data);
-    $token = $DahamiToken->getToken();
-    $data['accessToken'] = $token;
+    /******************** Redis ********************/
+    setRedisSessionData($session_data);
+    
     $data['uid'] = $uid;
     $data['pid'] = $premiumID;
     $data['regDate'] = $now_date;
@@ -125,10 +93,7 @@ if ($premiumID) {
     $success = true;
     $message = '로그인이 처리되었습니다.';
 } else {
-    $message = '아이디 혹은 패스워드가 잘못되었습니다.';
-    if ($headerAuth !== null) {
-        $message = '';
-    }
+    $message = '스크랩마스터 평가통계 진입에 실패했습니다.';
 }
 
 // to log authenticate

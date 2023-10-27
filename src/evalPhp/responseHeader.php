@@ -30,3 +30,4 @@ $http_origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : "";
 // } /* 보안상 나쁜 코드 */
 header("Access-Control-Allow-Origin: $http_origin");
 header('Access-Control-Allow-Credentials: true');
+header('Content-Type: application/json');
