@@ -84,7 +84,8 @@ window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 			> apt-get install php7.3-dev
 			> apt-get install libmcrypt-dev
 			> pecl install mcrypt-1.0.4
-		* php.ini:
+		* /etc/php/7.3/cli/php.ini:
 			> error_reporting = Windows와 동일..
-			> extension=mcrypt.so
-
+			> extension=/usr/lib/php/20180731/mcrypt.so
+		* /etc/php/7.3/apache2/conf.d/mcrypt.ini
+			> extension=/usr/lib/php/20180731/mcrypt.so
