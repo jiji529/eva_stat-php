@@ -62,7 +62,7 @@ window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 	
 	Linux (배포 - Ubuntu 22.04.2 LTS)
 	 - php 7.3 패키지 설치에 대한 PHPRedis 패키지 설치
-	  : apt-get install -y php7.3-redis
+	  $ apt-get install -y php7.3-redis
 		
 	참고 자료 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
 	
@@ -79,5 +79,5 @@ window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 	  : extension = php_mcrypt.dll 코드추가
 	  
 	Linux (배포)
-	 - apt-get install -y php7.3-mcrypt
+	 $ apt-get install -y php7.3-mcrypt
 	 
