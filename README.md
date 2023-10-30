@@ -50,42 +50,34 @@ window(top menu) --> preferences --> PHP --> Installed PHPs --> add <br />
 
  - redis
  
-	- (현)php 7.3과 호환이 되는 PHPRedis 5.3.5를 사용해야 함.
-	  (Token을 암호화/복호화하여 인증처리 방식에서 PHPRedis를 사용한 php session 방식으로 전환하여 필요.)
+	(현)php 7.3과 호환이 되는 PHPRedis 5.3.5를 사용해야 함.
+	 - (Token을 암호화/복호화하여 인증처리 방식에서 PHPRedis를 사용한 php session 방식으로 전환하여 필요.)
 	
-	- Windows 10 (개발)
-		* ../php73 > ext > php_redis.dll 파일추가.
-		* ../php73 > php.ini:
-			> extension = php_redis.dll 코드추가.
-		* ../evalPhp/phpRedis.php
-			> ini_set(redis 관련 내용 추가) 코드추가 (Redis접속 URL 변경시 확인 필요).
+	Windows 10 (개발) / 아래 내용 작업됨
+	 - ../php73 > ext > php_redis.dll 파일추가.
+	 - ../php73 > php.ini:
+	  : extension = php_redis.dll 코드추가.
+	 - ../evalPhp/phpRedis.php
+	  : ini_set(redis 관련 내용 추가) 코드추가 (Redis접속 URL 변경시 확인 필요).
 	
-	- Linux (배포 - Ubuntu 22.04.2 LTS)
-		* php 7.3 패키지 설치에 대한 PHPRedis 패키지 설치
-		* Download: 
-			> apt-get install php7.3-redis
+	Linux (배포 - Ubuntu 22.04.2 LTS)
+	 - php 7.3 패키지 설치에 대한 PHPRedis 패키지 설치
+	  : apt-get install -y php7.3-redis
 		
-	- 참고 자료 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
+	참고 자료 : https://github.com/phpredis/phpredis/blob/develop/INSTALL.md)
 	
 
  - mcrypt
  
-	- (현)php 7.3과 호환이 되는 mcrypt 1.0.4를 사용해야 함.
+	(현)loginAuto 시 사용되는 암호화 파라메터 처리시 필요함
 	
-	- Windows 10 (개발)
-		* Download: https://windows.php.net/downloads/pecl/releases/mcrypt/1.0.4/php_mcrypt-1.0.4-7.3-ts-vc15-x64.zip
-		* ../php73 > ext > php_mcrypt.dll 파일추가.
-		* ../php73 > php.ini 
-			> error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED 코드추가.
-			> extension = php_mcrypt.dll 코드추가
-	- Linux (배포)
-		* Download: 
-			> apt-get install php-pear
-			> apt-get install php7.3-dev
-			> apt-get install libmcrypt-dev
-			> pecl install mcrypt-1.0.4
-		* /etc/php/7.3/cli/php.ini:
-			> error_reporting = Windows와 동일..
-			> extension=/usr/lib/php/20180731/mcrypt.so
-		* /etc/php/7.3/apache2/conf.d/mcrypt.ini
-			> extension=/usr/lib/php/20180731/mcrypt.so
+	Windows 10 (개발) / 아래 내용 작업됨
+	 - Download: https://windows.php.net/downloads/pecl/releases/mcrypt/1.0.4/php_mcrypt-1.0.4-7.3-ts-vc15-x64.zip
+	 - ../php73 > ext > php_mcrypt.dll 파일추가.
+	 - ../php73 > php.ini 
+	  : error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_USER_DEPRECATED 코드추가.
+	  : extension = php_mcrypt.dll 코드추가
+	  
+	Linux (배포)
+	 - apt-get install -y php7.3-mcrypt
+	 
