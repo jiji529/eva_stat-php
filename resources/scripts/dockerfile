@@ -1,0 +1,38 @@
+FROM ubuntu:22.04
+
+RUN apt-get update
+RUN apt-get install -y apache2
+RUN a2enmod rewrite && sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository ppa:ondrej/php
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN true
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends php7.3 && apt-get install -y --no-install-recommends php7.3-mysql && apt-get install -y --no-install-recommends php7.3-mbstring && apt-get install -y --no-install-recommends php7.3-zip
+
+RUN apt-get install -y php7.3-redis && apt-get install -y php7.3-mcrypt
+
+COPY ../../src/evalPhp /var/www/html
+
+WORKDIR /var/www/html
+
+# sshd comand
+ENV TZ=Asia/Seoul
+RUN sed -i'' 's/archive\.ubuntu\.com/us\.archive\.ubuntu\.com/' /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+RUN echo 'root:16yrp.ekgkal]' |chpasswd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+EXPOSE 22
+EXPOSE 80
+EXPOSE 443
+
+COPY script.sh script.sh
+RUN chmod +x script.sh
+
+CMD ["./script.sh"]
+#CMD ["apache2ctl", "-D", "FOREGROUND"]
