@@ -13,7 +13,7 @@ RUN apt-get install -y --no-install-recommends php7.3 && apt-get install -y --no
 
 RUN apt-get install -y php7.3-redis && apt-get install -y php7.3-mcrypt
 
-COPY ../../src/evalPhp /var/www/html
+COPY ./evalPhp /var/www/html
 
 WORKDIR /var/www/html
 
