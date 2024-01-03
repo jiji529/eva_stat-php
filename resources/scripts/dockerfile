@@ -13,12 +13,17 @@ RUN apt-get install -y --no-install-recommends php7.3 && apt-get install -y --no
 
 RUN apt-get install -y php7.3-redis && apt-get install -y php7.3-mcrypt
 
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ 
+RUN ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
+RUN composer require predis/predis
+
 COPY ./evalPhp /var/www/html
 
 WORKDIR /var/www/html
 
 # sshd comand
 ENV TZ=Asia/Seoul
+ENV K8SRUN=TRUE
 RUN sed -i'' 's/archive\.ubuntu\.com/us\.archive\.ubuntu\.com/' /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y openssh-server

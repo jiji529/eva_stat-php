@@ -4,11 +4,47 @@
  * Date: 2023-10-25
  * Time: 오전 11:35
  */
-/* Session Env */
-ini_set('session.save_handler', 'redis');
-/* 유효하지 않은 세션을 자동 삭제할 시간(s) (memory, db, storage) */
-ini_set('session.gc_maxlifetime', 43200); 
-ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr:6379');
+require 'vendor/autoload.php';
+
+$SERV_ENV = getenv('K8SRUN');
+
+if ($SERV_ENV == "TRUE") {
+    
+    // Redis Sentinel 연결을 위한 매개변수 설정
+    $sentinelParameters = [
+        'scheme' => 'tcp',
+        'host' => 'sentinel.default.svc.cluster.k8s',
+        'port' => '5000',
+        'password' => 'sider47!$', // Sentinel 비밀번호 설정
+    ];
+    
+    // Redis Sentinel에 연결
+    $sentinel = new Predis\Client($sentinelParameters);
+    
+    // 활성 마스터 Redis의 주소 가져오기
+    $masterAddress = $sentinel->sentinel('get-master-addr-by-name', 'mymaster');
+    
+    // 활성 마스터 Redis 주소로 연결
+    $redisParameters = [
+        'scheme' => 'tcp',
+        'host' => $masterAddress[0],
+        'port' => $masterAddress[1],
+        'password' => 'sider47!$', // Redis 비밀번호 설정
+    ];
+    
+    // Redis에 연결
+    $redis = new Predis\Client($redisParameters);
+    
+    // 세션 핸들러 설정
+    $sessionHandler = new Predis\Session\Handler($redis);
+    session_set_save_handler($sessionHandler);
+} else {
+    /* Session Env */
+    ini_set('session.save_handler', 'redis');
+    /* 유효하지 않은 세션을 자동 삭제할 시간(s) (memory, db, storage) */
+    ini_set('session.gc_maxlifetime', 43200); 
+    ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr:6379');    
+}
 
 session_cache_expire(720); // 서버측 유효시간 (m)
 
