@@ -13,7 +13,7 @@
 namespace Predis\Session;
 
 use Predis\ClientInterface;
-use ReturnTypeWillChange;
+// use ReturnTypeWillChange;
 use SessionHandlerInterface;
 
 /**
@@ -57,7 +57,7 @@ class Handler implements SessionHandlerInterface
      * @param  string $session_id
      * @return bool
      */
-    #[ReturnTypeWillChange]
+    // #[ReturnTypeWillChange]
     public function open($save_path, $session_id)
     {
         // NOOP
@@ -67,7 +67,7 @@ class Handler implements SessionHandlerInterface
     /**
      * @return bool
      */
-    #[ReturnTypeWillChange]
+    // #[ReturnTypeWillChange]
     public function close()
     {
         // NOOP
@@ -78,7 +78,7 @@ class Handler implements SessionHandlerInterface
      * @param  int  $maxlifetime
      * @return bool
      */
-    #[ReturnTypeWillChange]
+    // #[ReturnTypeWillChange]
     public function gc($maxlifetime)
     {
         // NOOP
@@ -89,7 +89,7 @@ class Handler implements SessionHandlerInterface
      * @param  string $session_id
      * @return string
      */
-    #[ReturnTypeWillChange]
+    // #[ReturnTypeWillChange]
     public function read($session_id)
     {
         if ($data = $this->client->get($session_id)) {
@@ -104,7 +104,7 @@ class Handler implements SessionHandlerInterface
      * @param  string $session_data
      * @return bool
      */
-    #[ReturnTypeWillChange]
+    // #[ReturnTypeWillChange]
     public function write($session_id, $session_data)
     {
         $this->client->setex($session_id, $this->ttl, $session_data);
@@ -116,7 +116,7 @@ class Handler implements SessionHandlerInterface
      * @param  string $session_id
      * @return bool
      */
-    #[ReturnTypeWillChange]
+    // #[ReturnTypeWillChange]
     public function destroy($session_id)
     {
         $this->client->del($session_id);

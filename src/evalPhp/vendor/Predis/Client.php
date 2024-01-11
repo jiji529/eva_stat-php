@@ -591,7 +591,7 @@ class Client implements ClientInterface, IteratorAggregate
     /**
      * @return Traversable<string, static>
      */
-    #[ReturnTypeWillChange]
+     #[ReturnTypeWillChange]
     public function getIterator()
     {
         $clients = [];

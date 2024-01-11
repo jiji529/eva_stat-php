@@ -22,7 +22,8 @@ $sql = "SELECT `seq`, `name`, `order`,`isUse`,`automatic` FROM `evaluation` WHER
 
 $response = mysqli_query($db_conn, $sql) or die (json_encode(array("success"=>false, "message"=>mysqli_errno($db_conn))));
 
-$str =mb_convert_encoding('수록지면','utf-8' , 'euc-kr');
+//$str =mb_convert_encoding('수록지면','utf-8' , 'euc-kr');
+$str = '수록지면';
 
 $eval2 = array();
 $name_key_eval2 = array();
@@ -32,7 +33,8 @@ if($response) {
 		else $row['checkbox'] = false;
 		$name = $row['name'];
 		
-		if($name === $str) $row['name'] = mb_convert_encoding('기사위치','utf-8', 'euc-kr');
+		// if($name === $str) $row['name'] = mb_convert_encoding('기사위치','utf-8', 'euc-kr');
+		if($name === $str) $row['name'] = '기사위치';
 		$eval2[] = $row;
 		$name_key_eval2[$row['name']] = $row;
 	}

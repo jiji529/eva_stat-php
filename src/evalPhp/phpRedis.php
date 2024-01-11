@@ -5,9 +5,13 @@
  * Time: 오전 11:35
  */
 require 'vendor/autoload.php';
+// include_once __DIR__ . '/vendor/Predis/Client.php';
+// include_once __DIR__ . '/vendor/Predis/Session/Handler.php';
+// use Predis\Client;
+// use vendor\Predis\Client;
 
 $SERV_ENV = getenv('K8SRUN');
-
+/*
 if ($SERV_ENV == "TRUE") {
     
     // Redis Sentinel 연결을 위한 매개변수 설정
@@ -39,12 +43,12 @@ if ($SERV_ENV == "TRUE") {
     $sessionHandler = new Predis\Session\Handler($redis);
     session_set_save_handler($sessionHandler);
 } else {
-    /* Session Env */
+    /* Session Env *-/
     ini_set('session.save_handler', 'redis');
-    /* 유효하지 않은 세션을 자동 삭제할 시간(s) (memory, db, storage) */
+    /* 유효하지 않은 세션을 자동 삭제할 시간(s) (memory, db, storage) *-/
     ini_set('session.gc_maxlifetime', 43200); 
     ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr:6379');    
-}
+}*/
 
 session_cache_expire(720); // 서버측 유효시간 (m)
 
