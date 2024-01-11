@@ -189,7 +189,8 @@ function getEval1NamesArray($configEvalItemM1, $ev1Seq) {
 
 function getEval2Names($ev2s, $configEval) {
   $rtn = array(); $_c;
-  forEach($ev2s as $vk => $vv) {
+  if(empty($ev2s)) return $rtn; 
+  foreach($ev2s as $vk => $vv) {
     $_c = $configEval['item']['AT_M2'][$vv['eval2_seq']];
     if (!$_c) continue;
     if (equals($_c['group_isAuto'], 'Y')) { // 자동

@@ -3,7 +3,7 @@
 
 $filepath = $_REQUEST['filepath'];
 $userid = $_REQUEST['userid'];
-$url = "https://search.solr.api.dahami.com/nsearchDev/paperDown";
+$url = "https://search.solr.api.dahami.com/nsearch/paperDown";
 
 $postdata = http_build_query(
     array(
