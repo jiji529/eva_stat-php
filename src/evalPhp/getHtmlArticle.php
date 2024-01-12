@@ -3,7 +3,7 @@ include_once __DIR__ . '/common.php';
 // https://view.scrapmaster.co.kr/getSslHtml.do?pid=hgjeon&newsId=12024
 
 $url = $_REQUEST['url'];
-$url = 'https://view.scrapmaster.co.kr/getSslHtml.do?pid=' . $_REQUEST['pid'] . '&newsId=' . $_REQUEST['nid'];
+$url = 'https://web-viewer.scrapmaster.co.kr/getSslHtml.do?pid=' . $_REQUEST['pid'] . '&newsId=' . $_REQUEST['nid'];
 $arrContextOptions=array(
     "ssl"=>array(
         "verify_peer"=>false,
