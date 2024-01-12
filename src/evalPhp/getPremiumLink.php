@@ -17,7 +17,11 @@ $result['PremiumID'] = $premiumID;
 
 if($success) {
     /* ORIGIN = "https://web-viewer.scrapmaster.co.kr/admin/adminLoginTokenMake.do?smId=".$uid */
-    $tokenUrl = $pmLink."/admin/adminLoginTokenMake.do?smId=".$uid;
+    if ($pmLink == null) {
+        $tokenUrl = "https://web-viewer.scrapmaster.co.kr/admin/adminLoginTokenMake.do?smId=".$uid;
+    } else {
+        $tokenUrl = $pmLink."/admin/adminLoginTokenMake.do?smId=".$uid;
+    }
     // $tokenUrl = "https://wv.scrapmaster.co.kr/admin/adminLoginTokenMake.do?smId=".$uid;
     
     $ctx = stream_context_create(array(
