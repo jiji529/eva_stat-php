@@ -67,7 +67,7 @@ while ($row = mysqli_fetch_assoc($result_auto)) {
 }
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID);
+echo autoEvaluate($db, $config_eval, $news_id_arr, $premiumID); exit;
 
 $query = "SELECT `folderID`, `folderName` FROM FolderInfo WHERE scrapBookNo = {$scrapBookNo} ORDER BY ForS;";
 

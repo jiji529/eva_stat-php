@@ -250,7 +250,7 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID) {
 
                 if (is_array($data_fetch) && count($data_fetch) > 0) {
                   foreach ($data_fetch as $dk => $dv) {
-                    $query_insert = "INSERT INTO `newsEval` (`hnp_news_seq`, `evalClassify_seq`) VALUES " . implode(',', $dv);
+                    $query_insert = "INSERT INTO `newsEval` (`hnp_news_seq`, `evalClassify_seq`) VALUES " . implode(',', $dv); echo $query_insert; exit;
                     logs('autoEvaluate.insert: ' . strlen($query_insert));
                     $db->Query($query_insert);
                     if ($db->Error()) {
