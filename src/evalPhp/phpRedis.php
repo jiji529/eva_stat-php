@@ -11,7 +11,8 @@ require 'vendor/autoload.php';
 // use vendor\Predis\Client;
 
 $SERV_ENV = getenv('K8SRUN');
-/*
+// 배포 후, 서버(docker)에서 세팅되는 변수
+
 if ($SERV_ENV == "TRUE") {
     
     // Redis Sentinel 연결을 위한 매개변수 설정
@@ -42,15 +43,9 @@ if ($SERV_ENV == "TRUE") {
     // 세션 핸들러 설정
     $sessionHandler = new Predis\Session\Handler($redis);
     session_set_save_handler($sessionHandler);
-} else {
-    /* Session Env *-/
-    ini_set('session.save_handler', 'redis');
-    /* 유효하지 않은 세션을 자동 삭제할 시간(s) (memory, db, storage) *-/
-    ini_set('session.gc_maxlifetime', 43200); 
-    ini_set('session.save_path', 'tcp://redis.scrapmaster.co.kr:6379');    
-}*/
+} 
 
-session_cache_expire(720); // 서버측 유효시간 (m)
+ini_set('session.gc_maxlifetime', 43200); // 세션유지시간(s) 12시간
 
 /* 세션 생성 및 선언 */
 session_start();

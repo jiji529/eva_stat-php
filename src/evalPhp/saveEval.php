@@ -69,29 +69,40 @@ if ($eval2Change === 'true') {
                 $auto_ev_seqs = array_merge($auto_ev_seqs, explode(',', $ev2_auto_reference[$ev2]['sibling']));
             }
             if (in_array($ev2, $auto_ev_seqs)) { // UPDATE
-                $auto_seqs[] = $ev2;
+                array_push($auto_seqs, $ev2);
             } else { // DELETE & INSERT
-                $ev2_seqs[] = $ev2;
+                array_push($ev2_seqs, $ev2);
             }
         }
 
         $affected_row_count_by_delete = 0;
         //해당 news_id의 eval2 값 삭제
-        $delete = "DELETE FROM `newsEval` WHERE `hnp_news_seq` IN ({$news_id}) AND `evalClassify_seq` NOT IN (" . implode(',', $auto_ev_seqs) . ")";
-//         //$delete = "DELETE FROM newsEval WHERE hnp_news_seq IN ({$news_id}) AND evalClassify_seq IN (SELECT seq FROM evalClassify WHERE evaluation_seq IN (SELECT evaluation_seq FROM evalClassify LEFT OUTER JOIN evaluation ON evaluation.seq = evalClassify.evaluation_seq WHERE evalClassify.seq IN (" . implode(',', $eval2_arr) . ")))";
+        $delete = "DELETE FROM `newsEval` WHERE `hnp_news_seq` IN ({$news_id})";
+        // $delete = "DELETE FROM `newsEval` WHERE `hnp_news_seq` IN ({$news_id}) AND `evalClassify_seq` NOT IN (" . implode(',', $auto_ev_seqs) . ")";
+        // $delete = "DELETE FROM newsEval WHERE hnp_news_seq IN ({$news_id}) AND evalClassify_seq IN (SELECT seq FROM evalClassify WHERE evaluation_seq IN (SELECT evaluation_seq FROM evalClassify LEFT OUTER JOIN evaluation ON evaluation.seq = evalClassify.evaluation_seq WHERE evalClassify.seq IN (" . implode(',', $eval2_arr) . ")))";
         $result = mysqli_query($db_conn, $delete) or die(mysqli_error($db_conn) . ' E001-2');
         $affected_row_count_by_delete = mysqli_affected_rows($db_conn);
 
-        $update_query = '';
-        foreach ($auto_seqs as $at) {
-            if ($ev2_auto_reference[$at]) {
+//         $update_query = '';
+//         foreach ($auto_seqs as $at) {
+//             if ($ev2_auto_reference[$at]) {
+//                 $affected_row_count_by_update++;
+//                 $update = "UPDATE `newsEval` SET `evalClassify_seq` = '" . $at . "' WHERE `hnp_news_seq` = '" . $news_id . "' AND `evalClassify_seq` IN (" . $ev2_auto_reference[$at]['sibling'] . ")";
+//                 $result = mysqli_query($db_conn, $update) or die(mysqli_error($db_conn) . ' E001-2');
+//                 $update_query .= ' ; ' . $update;
+//             }
+//         }
+        if (is_array($auto_seqs) && count($auto_seqs) > 0) {
+            $insert = "INSERT INTO newsEval (evalClassify_seq, hnp_news_seq) VALUES ";
+            foreach ($auto_seqs as $eval2_one) {
+                $insert .= "( {$eval2_one}, {$news_id} ),";
                 $affected_row_count_by_update++;
-                $update = "UPDATE `newsEval` SET `evalClassify_seq` = '" . $at . "' WHERE `hnp_news_seq` = '" . $news_id . "' AND `evalClassify_seq` IN (" . $ev2_auto_reference[$at]['sibling'] . ")";
-                $result = mysqli_query($db_conn, $update) or die(mysqli_error($db_conn) . ' E001-2');
-                $update_query .= ' ; ' . $update;
             }
+            $insert = substr($insert, 0, -1);
+            $result = mysqli_query($db_conn, $insert) or die(mysqli_error($db_conn) . ' E001-3' . $insert . ' val:' . json_encode($auto_seqs) . ' cnt:' . count($auto_seqs));
+            $affected_row_count_by_insert = mysqli_affected_rows($db_conn);
         }
-
+        
         if (is_array($ev2_seqs) && count($ev2_seqs) > 0) {
             $insert = "INSERT INTO newsEval (evalClassify_seq, hnp_news_seq) VALUES ";
             foreach ($ev2_seqs as $eval2_one) {

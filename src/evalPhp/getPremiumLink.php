@@ -16,12 +16,11 @@ $result['UID'] = $uid;
 $result['PremiumID'] = $premiumID;
 
 if($success) {
+    $pmLink = "".$pmLink;
     /* ORIGIN = "https://web-viewer.scrapmaster.co.kr/admin/adminLoginTokenMake.do?smId=".$uid */
-    if ($pmLink == null) {
-        $tokenUrl = "https://web-viewer.scrapmaster.co.kr/admin/adminLoginTokenMake.do?smId=".$uid;
-    } else {
-        $tokenUrl = $pmLink."/admin/adminLoginTokenMake.do?smId=".$uid;
-    }
+    if (trim($pmLink) == "null") {
+        $pmLink = "https://web-viewer.scrapmaster.co.kr";
+    } 
     // $tokenUrl = "https://wv.scrapmaster.co.kr/admin/adminLoginTokenMake.do?smId=".$uid;
     
     $ctx = stream_context_create(array(
@@ -33,7 +32,7 @@ if($success) {
             "verify_peer_name"=>false,
         )
     ));
-    $tokenRet = json_decode(file_get_contents($tokenUrl, false, $ctx), true);
+    $tokenRet = json_decode(file_get_contents($pmLink."/admin/adminLoginTokenMake.do?smId=".$uid, false, $ctx), true);
     
     if ($tokenRet && $tokenRet['success']) {
         $result['tokenResult'] = $tokenRet;
@@ -44,10 +43,8 @@ if($success) {
     }
     // 토큰정보 가져오기 실패의 경우
     else {
-        // API 호출은 성공했으나 결과가 실패일때 / 메시지 전송
-        if($tokenRet) {
-            $result['errMsg'] = $tokenRet['msg'];
-        }
+        // API 호출은 성공했으나 결과가 실패일때 / 메시지 전송        
+        $result['tokenResult'] = $tokenRet;
         $result['success'] = false;
     }
 }
