@@ -44,7 +44,7 @@ if ($SERV_ENV == "TRUE") {
     $sessionHandler = new Predis\Session\Handler($redis);
     session_set_save_handler($sessionHandler);
 } 
-
+// session_cache_expire(720); // 기존에 사용하던 코드
 ini_set('session.gc_maxlifetime', 43200); // 세션유지시간(s) 12시간
 
 /* 세션 생성 및 선언 */
