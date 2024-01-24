@@ -162,73 +162,153 @@ if (count($eval0Arr) > 0 || count($eval2Arr) > 0) {
 
 /**
  * 키워드 및 배제어
+ * $searchField : "1"(제목+내용), "2"(제목), "3"(내용)
+ * $keywordOption : 1(AND), 2(OR)
+ * $keyword : 검색어
+ * $notKeyword : 배제어
  */
-if ($keyword || $notKeyword) {
-    if ($keyword) {
-        if ($keywordOption === '1') {
-            $keyword = '+' . preg_replace('/ +/', '*+', $keyword) . '*';
-        } else {
-            $keyword = preg_replace('/ +/', '* ', $keyword) . '*';
+/* 검색어 */
+if ($keyword) {
+    $keyword_arr = explode(' ', $keyword);
+    $length = count($keyword_arr);
+    $keyword = " AND ( ";
+    foreach ($keyword_arr as $key => $keyword_one) {
+        
+        switch ($searchField) {
+            case '1':
+                $keyword .= " ( `news_title` like '%{$keyword_one}%' OR `news_contents` like '%{$keyword_one}%' ) ";
+                break;
+            case '2':
+                $keyword .= " ( `news_title` like '%{$keyword_one}%' ) ";
+                break;
+            case '3':
+                $keyword .= " ( `news_contents` like '%{$keyword_one}%' ) ";
+                break;
+            default:
+                $result['message'] = "Search Option error";
+                break;
         }
-    }
-
-    if ($notKeyword) {
-        if ($notKeywordOption === '1') {
-            $keyword .= ' -' . preg_replace('/ +/', '* -', $notKeyword) . '*';
-        } else {
-            $notKeyword = '-' . preg_replace('/ +/', '* -', $notKeyword) . '*';
-            $notKeyword = explode(' ', $notKeyword);
+        
+        if ($key != ($length - 1)) { // last keyword
+            switch ($keywordOption) {
+                case '1':
+                    $keyword .= " AND ";
+                    break;
+                case '2':
+                    $keyword .= " OR ";
+                    break;
+                default:
+                    $result['message'] = "Search Option error";
+                    break;
+            }            
+        } //if
+    } //for
+    $subQuery .= $keyword . " ) ";
+} //if keyword
+/* 배제어 */
+if ($notKeyword) {
+    $notKeyword_arr = explode(' ', $notKeyword);
+    $length = count($notKeyword_arr);
+    $notKeyword = " AND ( ";
+    foreach ($notKeyword_arr as $key => $keyword_one) {
+        
+        switch ($searchField) {
+            case '1':
+                $notKeyword .= " !( `news_title` like '%{$keyword_one}%' OR `news_contents` like '%{$keyword_one}%' ) ";
+                break;
+            case '2':
+                $notKeyword .= " !( `news_title` like '%{$keyword_one}%' ) ";
+                break;
+            case '3':
+                $notKeyword .= " !( `news_contents` like '%{$keyword_one}%' ) ";
+                break;
+            default:
+                $result['message'] = "Search Option error";
+                break;
         }
-    }
-
-    switch ($searchField) {
-        case '2':
-            if (is_array($notKeyword)) {
-                $subQuery .= "AND ( ";
-                foreach ($notKeyword as $key => $nk) {
-                    if ($key !== 0) {
-                        $subQuery .= "OR ";
-                    }
-                    $subQuery .= "MATCH(`news_title`) AGAINST('$keyword $nk' IN BOOLEAN MODE) ";
-                }
-                $subQuery .= ") ";
-            } else {
-                $subQuery .= "AND MATCH(`news_title`) AGAINST('$keyword' IN BOOLEAN MODE) ";
+        
+        if ($key != ($length - 1)) { // last keyword
+            switch ($keywordOption) {
+                case '1':
+                    $notKeyword .= " OR ";
+                    break;
+                case '2':
+                    $notKeyword .= " AND ";
+                    break;
+                default:
+                    $result['message'] = "Search Option error";
+                    break;
             }
-            break;
-        case '3':
-            if (is_array($notKeyword)) {
-                $subQuery .= "AND ( ";
-                foreach ($notKeyword as $key => $nk) {
-                    if ($key !== 0) {
-                        $subQuery .= "OR ";
-                    }
-                    $subQuery .= "MATCH(`news_contents`) AGAINST('$keyword $nk' IN BOOLEAN MODE) ";
-                }
-                $subQuery .= ") ";
-            } else {
-                $subQuery .= "AND MATCH(`news_contents`) AGAINST('$keyword' IN BOOLEAN MODE) ";
-            }
+        } //if
+    } //for
+    $subQuery .= $notKeyword . " ) ";
+} //if notKeyword
 
-            break;
-        default:
-            if (is_array($notKeyword)) {
-                $subQuery .= "AND ( ";
-                foreach ($notKeyword as $key => $nk) {
-                    if ($key !== 0) {
-                        $subQuery .= "OR ";
-                    }
-                    $subQuery .= "MATCH(`news_title`,`news_contents`) AGAINST('$keyword $nk' IN BOOLEAN MODE) ";
-                }
-                $subQuery .= ") ";
-            } else {
-                $subQuery .= "AND MATCH(`news_title`,`news_contents`) AGAINST('$keyword' IN BOOLEAN MODE)  ";
-            }
+// if ($keyword || $notKeyword) {
+//     if ($keyword) {
+//         if ($keywordOption === '1') {
+//             $keyword = '+' . preg_replace('/ +/', '*+', $keyword) . '*';
+//         } else {
+//             $keyword = preg_replace('/ +/', '* ', $keyword) . '*';
+//         }
+//     }
 
-            break;
-    }
-}
-// $subQuery .= "ORDER BY `hnews`.`media_name`";
+//     if ($notKeyword) {
+//         if ($notKeywordOption === '1') {
+//             $keyword .= ' -' . preg_replace('/ +/', '* -', $notKeyword) . '*';
+//         } else {
+//             $notKeyword = '-' . preg_replace('/ +/', '* -', $notKeyword) . '*';
+//             $notKeyword = explode(' ', $notKeyword);
+//         }
+//     }
+
+//     switch ($searchField) {
+//         case '2':
+//             if (is_array($notKeyword)) {
+//                 $subQuery .= "AND ( ";
+//                 foreach ($notKeyword as $key => $nk) {
+//                     if ($key !== 0) {
+//                         $subQuery .= "OR ";
+//                     }
+//                     $subQuery .= "MATCH(`news_title`) AGAINST('$keyword $nk' IN BOOLEAN MODE) ";
+//                 }
+//                 $subQuery .= ") ";
+//             } else {
+//                 $subQuery .= "AND MATCH(`news_title`) AGAINST('$keyword' IN BOOLEAN MODE) ";
+//             }
+//             break;
+//         case '3':
+//             if (is_array($notKeyword)) {
+//                 $subQuery .= "AND ( ";
+//                 foreach ($notKeyword as $key => $nk) {
+//                     if ($key !== 0) {
+//                         $subQuery .= "OR ";
+//                     }
+//                     $subQuery .= "MATCH(`news_contents`) AGAINST('$keyword $nk' IN BOOLEAN MODE) ";
+//                 }
+//                 $subQuery .= ") ";
+//             } else {
+//                 $subQuery .= "AND MATCH(`news_contents`) AGAINST('$keyword' IN BOOLEAN MODE) ";
+//             }
+
+//             break;
+//         default:
+//             if (is_array($notKeyword)) {
+//                 $subQuery .= "AND ( ";
+//                 foreach ($notKeyword as $key => $nk) {
+//                     if ($key !== 0) {
+//                         $subQuery .= "OR ";
+//                     }
+//                     $subQuery .= "MATCH(`news_title`,`news_contents`) AGAINST('$keyword $nk' IN BOOLEAN MODE) ";
+//                 }
+//                 $subQuery .= ") ";
+//             } else {
+//                 $subQuery .= "AND MATCH(`news_title`,`news_contents`) AGAINST('$keyword' IN BOOLEAN MODE)  ";
+//             }
+
+//             break;
+//     }
+// }
 
 // 공통 설정
 $config_eval = getConfigEval($db);
