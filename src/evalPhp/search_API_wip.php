@@ -600,8 +600,22 @@ foreach($article as $ak => &$av) {
     unset($article[$ak]['category_output']);
 }
 
+/* 폴더명 */
+$articles = array();
+foreach($article as $ak => &$av)
+{
+    $foldername = $config_eval['category'][$av['media_category']]['category_name'];
+    $av['media_category_name'] = $foldername;
+    $av['media_type_name'] = $config_eval['type'][$av['media_type']]['name'];
+    
+    if (!is_array($articles[$foldername])) {
+        $articles[$foldername] = array();
+    }
+    array_push($articles[$foldername], $av);
+}
+
 $result_final = array();
-$result_final['articles'] = $article;
+$result_final['articles'] = $articles;
 $result_final['config'] = $config_eval;
 $result_final['evals'] = $evals;
 $result_final['doTotalCount'] = $doTotalCount; // DEBUG
