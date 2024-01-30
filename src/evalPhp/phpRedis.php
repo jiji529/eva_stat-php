@@ -51,6 +51,11 @@ if ($SERV_ENV == "TRUE") {
 /* 세션 생성 및 선언 */
 session_start();
 
+/* 테스트 간단 로그인 */
+// setRedisSessionData(array(
+//     "AGENT" => $_SERVER['HTTP_USER_AGENT']
+// ));
+
 function setRedisSessionData($params) {
     if (!session_id() 
         || is_null($params) || !is_array($params))

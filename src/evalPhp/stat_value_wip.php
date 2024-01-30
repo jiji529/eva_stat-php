@@ -339,7 +339,7 @@ if ($db->Error()) {
 }
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID);
+autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, false);
 
 $query_full = 'SELECT * FROM (' . $query . $subQuery . ' GROUP BY `hnews`.`news_id`) `T` ' . $evalQuery . ' ORDER BY `T`.`media_name`';
 logs('stat.query : ' . $query_full);

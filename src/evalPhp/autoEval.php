@@ -48,7 +48,7 @@ if ($db->Error()) {
   while ($row = mysqli_fetch_array($db->Records(), MYSQLI_ASSOC)) {
     $news_id_arr[] = $row['news_id'];
   }
-  $result = autoEvaluate($db, $config_eval, $news_id_arr, $premiumID);
+  $result = autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, false);
 }
 
 echo json_encode($result);

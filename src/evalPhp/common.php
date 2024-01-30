@@ -9,6 +9,7 @@ header('Access-Control-Allow-Headers: Authorization');
 include_once __DIR__ . '/responseHeader.php';
 include_once __DIR__ . '/phpRedis.php';
 
+set_time_limit(0);
 $message = '유효하지 않은 접근입니다.';
 if (diffHttpUserAgent()) {
     $result['success'] = false;
