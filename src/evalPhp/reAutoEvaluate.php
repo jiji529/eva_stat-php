@@ -8,7 +8,15 @@ include_once __DIR__ . '/getConfigEval.php';
 include_once __DIR__ . '/calcArticleValue.php';
 include_once __DIR__ . '/columnSettingFunc.php';
 
-$premiumID = 'djLabTest_cmlim';
+$evaluationSeq = $_REQUEST['evaluationSeq'];
+if (!is_numeric($evaluationSeq) || $evaluationSeq < 0) {
+    if ($message) $rtn_meta['msg'] = $message;
+    $rtn_meta['pid'] = $premiumID;
+    $rtn_meta['success'] = false;
+    $rtn_meta['evaluationSeq'] = $evaluationSeq;
+    echo json_encode($json);
+    exit;
+}
 
 //클래스 --------------------------------------------------------------------------------
 $db = new ClassStat($premiumID);
@@ -66,10 +74,10 @@ while ($row = mysqli_fetch_assoc($result_auto)) {
 }
 
 /* 자동평가 카테고리 목록 찾기 */
-$autoSeq = array();
-foreach ($config_eval['policy']['AT'] as $key) {
-    array_push($autoSeq, $key['seq']);
-}
+// $autoSeq = array();
+// foreach ($config_eval['policy']['AT'] as $key) {
+//     array_push($autoSeq, $key['seq']);
+// }
 
 $query_delete = "
     DELETE FROM `newsEval`
@@ -78,7 +86,7 @@ $query_delete = "
     	SELECT seq
     	FROM `evalClassify`
     	WHERE evaluation_seq IN (
-    		".implode(',',$autoSeq)."
+    		".$evaluationSeq."
     	)
     )
     AND hnp_news_seq IN (
@@ -115,6 +123,6 @@ while ($row = mysqli_fetch_assoc($list)) {
 */
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, true);
+echo json_encode(autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $evaluationSeq));
 
 exit;

@@ -381,7 +381,7 @@ while ($row = mysqli_fetch_assoc($result_auto)) {
 }
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, false);
+autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
 
 $query2 .= $evalQuery;
 
