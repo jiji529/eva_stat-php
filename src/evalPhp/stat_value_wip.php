@@ -14,6 +14,7 @@ include_once __DIR__ . '/common.php';
 include_once __DIR__ . '/ClassPage.php';
 include_once __DIR__ . '/ClassStat.php';
 include_once __DIR__ . '/ClassSearch.php';
+include_once __DIR__ . '/ClassTypeUtil.php';
 include_once __DIR__ . '/autoEvaluate.php';
 include_once __DIR__ . '/getConfigEval.php';
 include_once __DIR__ . '/calcArticleValue.php';
@@ -22,6 +23,8 @@ $result = array();
 $db = new ClassStat($premiumID);
 $ClassPage = new ClassPage();
 $ClassSearch = new ClassSearch($premiumID);
+$db_conn = $ClassSearch->getDBConn();
+$ctu = new ClassTypeUtil($db_conn);
 if ($db->Error()) {
     $result['success'] = false;
     $result['notice_code'] = $db->ErrorNumber();
@@ -81,6 +84,10 @@ $query_auto .= "AND `hcate`.`mediaType` != -98 ";
 $query_auto .= "AND `hcate`.`isUse` = '0' ";
 
 $subQuery = '';
+
+//ClassType---------------------------------------------------------------------------
+//대소제목 자동평가 준비
+$ctu->classTypeAutoEvaluation($startDate, $endDate, $news_me);
 
 /**
  * 날짜 범위
@@ -339,7 +346,8 @@ if ($db->Error()) {
 }
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
+$ck = autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
+if ($ck["success"]) $ctu->InsertClassType();
 
 $query_full = 'SELECT * FROM (' . $query . $subQuery . ' GROUP BY `hnews`.`news_id`) `T` ' . $evalQuery . ' ORDER BY `T`.`media_name`';
 logs('stat.query : ' . $query_full);

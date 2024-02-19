@@ -38,6 +38,7 @@ $sql = "SELECT hnews.news_id,
 			eval1.isUse AS `eval1_use`,
 			newsEval.evalClassify_seq AS `eval2_seq`,
 			eval2.VALUE AS `eval2_name`,
+			eval2.refValue AS `eval2_ref_value`,
 			eval2.evaluation_seq AS `eval2_upper_seq`,
 			eval2_upper.NAME AS `eval2_upper_name`,
 			eval2_upper.isUse AS `eval2_upper_use`,
@@ -81,7 +82,12 @@ while ($row = mysqli_fetch_assoc($data)) {
     }
 
     if($upper_use === 'Y' && $eval2_use === 'Y'  && $eval2_seq !== null && $upper_seq !==null) {
-        $eval2 = array('eval2_name' => $row['eval2_name'], 'eval2_seq' => $row['eval2_seq']);
+        if ($row['eval2_upper_seq'] == "7") {
+            $eval2 = array('eval2_name' => ( $row['eval2_ref_value']."-".$row['eval2_name']), 'eval2_seq' => $row['eval2_seq']);
+        } else {
+            $eval2 = array('eval2_name' => $row['eval2_name'], 'eval2_seq' => $row['eval2_seq']);
+        }
+        
         $evalInfo[$id]['eval2Cnt']++;
         if ($upper_seq > 1000) {
             $evalInfo[$id]['eval2m2Cnt']++;

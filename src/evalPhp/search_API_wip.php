@@ -11,6 +11,7 @@ include_once __DIR__ . '/common.php';
 include_once __DIR__ . '/ClassPage.php';
 include_once __DIR__ . '/ClassStat.php';
 require_once __DIR__ . "/ClassSearch.php";
+include_once __DIR__ . '/ClassTypeUtil.php';
 require_once __DIR__ . '/autoEvaluate.php';
 include_once __DIR__ . '/getConfigEval.php';
 include_once __DIR__ . '/calcArticleValue.php';
@@ -24,6 +25,7 @@ $columnSetting = $columnSetting['final'];
 //검색조건 받기----------------------------------------------------------------------------
 //dbconn
 $db_conn = $ClassSearch->getDBConn();
+$ctu = new ClassTypeUtil($db_conn);
 //1.날짜
 $dateStand = $_REQUEST['selectedDateStand'] ? $_REQUEST['selectedDateStand'] : "0";
 $year = $_REQUEST['selYear'] ?  $_REQUEST['selYear']  : date('Y');
@@ -93,6 +95,10 @@ $remove_news_serial = $_REQUEST['remove_news_serial'];
 //에러-------------------------------------------------------------------------------
 if (!$year && (!$sDate || !$eDate)) exit;
 // if ($limit_back > 50) exit;
+
+//ClassType---------------------------------------------------------------------------
+//대소제목 자동평가 준비
+$ctu->classTypeAutoEvaluation($sDate, $eDate, $news_me);
 
 //query-------------------------------------------------------------------------------
 $query = "";
@@ -381,7 +387,8 @@ while ($row = mysqli_fetch_assoc($result_auto)) {
 }
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
+$ck = autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
+if ($ck["success"]) $ctu->InsertClassType();
 
 $query2 .= $evalQuery;
 

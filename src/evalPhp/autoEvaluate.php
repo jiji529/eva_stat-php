@@ -22,7 +22,7 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $reEvaluation
                 logs('autoEvaluate.db.error1');
             } else {
                 $sorted_gi_config = array();
-                for ($i = 1; $i <= 5; $i++) {
+                for ($i = 1; $i <= 6; $i++) {
                     foreach($config_eval['group_item'][$i] as $v) {
                         if ($v['isUse'] === 'Y')
                             $sorted_gi_config[$i][] = $v;
@@ -97,7 +97,7 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $reEvaluation
                     logs('  failsafe g5: ' . $seq_failsafe_position);
                 }
                 // 매체중요도(mediaGroup)에 없는 매체정보(hnp_category) 맞춤
-                
+
                 logs('sorted_gi_config : ' . json_encode($sorted_gi_config));
                 
                 $rtn_meta['input'] = count($news_id_arr);
@@ -135,6 +135,7 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $reEvaluation
                         $query_fetch .= ", `hnp_news`.`article_serial`, `hnp_news`.`part_name`";
                         $query_fetch .= ", COUNT(`hnp_news`.`news_id`) AS `eval_count` ";
                         $query_fetch .= ", `eval2`.`evaluation_seq` ";
+                        $query_fetch .= ", `hnp_news`.`pos_rate`, `hnp_news`.`mid_rate`, `hnp_news`.`neg_rate` ";
                         $query_fetch .= "FROM `hnp_news`
                           LEFT JOIN `hnp_category` ON `hnp_category`.`media_id` = `hnp_news`.`media_id`
                           LEFT JOIN `mediaGroup` ON `mediaGroup`.`hnp_category_media_id` = `hnp_news`.`media_id`
@@ -259,6 +260,29 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $reEvaluation
                                             $tmp_fetch_seq = $cv['seq']; break;
                                         }
                                     }
+                                    $data_fetch[$idx_fetch][] = '(' . $row['news_id'] . ',' . $tmp_fetch_seq . ')'; // 5수록지면
+                                    logs('autoEvaluate.position.seq.fin: ' . $tmp_fetch_seq);
+                                }
+                                
+                                /* 기사 긍-부정 */
+                                $pnSeq = array(
+                                    $row["pos_rate"]=>$sorted_gi_config[6][0]
+                                    ,$row["mid_rate"]=>$sorted_gi_config[6][1]
+                                    ,$row["neg_rate"]=>$sorted_gi_config[6][2]
+                                );
+                                ksort($pnSeq); // 내림차순 정렬
+                                $per = array_key_last($pnSeq); // Percentage
+                                $tmp_fetch_seq = $pnSeq[$per]["seq"]; // Sequence
+                                $minValue = intval($pnSeq[$per]["refValue"]); // min
+                                $per = floatval($per); //current
+                                if ($per > -1) {
+                                    $tmp_fetch_seq = ($minValue > $per ? null : $tmp_fetch_seq);
+                                } else {
+                                    $tmp_fetch_seq = null;
+                                }
+                                if ($tmp_fetch_seq != null 
+                                    && (($reEvaluation >= 0 && in_array($tmp_fetch_seq, $reEvalItemSeq)) 
+                                    || $reEvaluation < 0)) {
                                     $data_fetch[$idx_fetch][] = '(' . $row['news_id'] . ',' . $tmp_fetch_seq . ')'; // 5수록지면
                                     logs('autoEvaluate.position.seq.fin: ' . $tmp_fetch_seq);
                                 }

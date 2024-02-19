@@ -6,6 +6,7 @@ include_once __DIR__ . '/common.php';
 include_once __DIR__ . '/ClassPage.php';
 include_once __DIR__ . '/ClassStat.php';
 require_once __DIR__ . "/ClassSearch.php";
+include_once __DIR__ . '/ClassTypeUtil.php';
 require_once __DIR__ . '/autoEvaluate.php';
 include_once __DIR__ . '/getConfigEval.php';
 include_once __DIR__ . '/calcArticleValue.php';
@@ -15,6 +16,7 @@ $ClassPage = new ClassPage();
 $ClassSearch = new ClassSearch($premiumID);
 $db_conn = $ClassSearch->getDBConn();
 $db = new ClassStat($premiumID);
+$ctu = new ClassTypeUtil($db_conn);
 if ($db->Error()) {
     $result['success'] = false;
     $result['notice_code'] = $db->ErrorNumber();
@@ -56,7 +58,7 @@ if (!$config_eval) {
 }
 
 // 자동평가 준비 - news_id
-$query_auto = "SELECT `news_id` FROM `hnp_news` WHERE `scrapBookNo` = ${scrapBookNo} AND `articleSequence` = 0";
+$query_auto = "SELECT `news_id`, `news_title`, `classType`, `scrapBookNo` FROM `hnp_news` WHERE `scrapBookNo` = ${scrapBookNo} AND `articleSequence` = 0";
 $result_auto = mysqli_query($db_conn, $query_auto) or die(mysqli_error($db_conn) . ' E001-0');
 $news_id_cnt = 0; $news_id_arr = array();
 while ($row = mysqli_fetch_assoc($result_auto)) {
@@ -65,9 +67,12 @@ while ($row = mysqli_fetch_assoc($result_auto)) {
         $news_id_cnt++;
     }
 }
+// 대소제목 자동평가 준비
+$ctu->classTypeAutoEvaluation($scrapDate, $scrapDate, $newsMe);
 
 // 자동평가 생성
-autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
+$ck = autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);
+if ($ck["success"]) $ctu->InsertClassType();
 
 $query = "SELECT `folderID`, `folderName` FROM FolderInfo WHERE scrapBookNo = {$scrapBookNo} ORDER BY ForS;";
 
@@ -113,12 +118,14 @@ $query = "SELECT `news_id`, `hnews`.`media_id`, `hcate`.`media_name`, `hcate`.`m
     `mediaGroup`.`evalClassify_seq` AS `mediaAuto`,
     GROUP_CONCAT(`newsEval`.`evalClassify_seq`) AS `eval2_seqs`,
     `hcate`.`evalValue` AS `media_value`, `hnews`.`keywords`
+    ,`evalClassify`.refValue
 FROM `hnp_news` as `hnews`
 LEFT JOIN `hnp_category` AS `hcate` ON `hcate`.`media_id` = `hnews`.`media_id`
 LEFT JOIN `reporterGroup` ON `reporterGroup`.`hnp_category_media_id` = `hnews`.`media_id`
     AND `hnews`.`news_reporter` LIKE CONCAT('%',  `reporterGroup`.`reporterName`, '%') AND `reporterGroup`.`isUse` = 'Y'
 LEFT JOIN `mediaGroup` ON `mediaGroup`.`hnp_category_media_id` = `hnews`.`media_id`
 LEFT JOIN `newsEval` ON `newsEval`.`hnp_news_seq` = `hnews`.`news_id`
+LEFT JOIN `evalClassify` ON `newsEval`.`evalClassify_seq` = `evalClassify`.`seq`
 WHERE `hnews`.`scrapBookNo` = {$scrapBookNo} AND `hcate`.`media_name` NOT IN ('', '이미지', '글상자', '대제목', '소제목', '불확실') AND `hcate`.`mediaType` != -98 AND `hcate`.`isUse` = '0' GROUP BY `hnews`.`news_id` ORDER BY `scrappage`, `zorder`"; /* AND `hnews`.`isUse` = 0 */ /* remove 2019-04-26 jw*/
 //GROUP BY hnp_news.article_serial
 $query_result = mysqli_query($db_conn, $query) or die(mysqli_error($db_conn) . ' E001-3');
@@ -203,6 +210,7 @@ while ($row = mysqli_fetch_assoc($query_result))
         if ($ev) $article[$i]['eval2'][] = array('eval2_seq' => $ev);
     }
     $i++;
+    
 }
 
 foreach($article as $ak => &$av)

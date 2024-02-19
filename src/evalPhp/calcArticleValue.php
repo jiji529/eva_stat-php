@@ -91,13 +91,23 @@ function calcArticleValue($row, $config_eval) {
     }
     $eval2_score *= $eval2_score_current;
 
-    $rtn['eval2'][] = array(
-      'eval2_seq' => $ev,
-      'eval2_name' => $config_eval2_tmp['value'],
-      'eval2_score' => $eval2_score_current,
-      'eval2_group_seq' => $config_eval2_tmp['group_seq'],
-      'eval2_upper_name' => $config_eval2_tmp['group_name']
-    );
+    if ($config_eval2_tmp["group_seq"] == "7") {
+        $rtn['eval2'][] = array(
+            'eval2_seq' => $ev,
+            'eval2_name' => $config_eval2_tmp["refValue"]."-".$config_eval2_tmp['value'],
+            'eval2_score' => $eval2_score_current,
+            'eval2_group_seq' => $config_eval2_tmp['group_seq'],
+            'eval2_upper_name' => $config_eval2_tmp['group_name']
+        );
+    } else {
+        $rtn['eval2'][] = array(
+          'eval2_seq' => $ev,
+          'eval2_name' => $config_eval2_tmp['value'],
+          'eval2_score' => $eval2_score_current,
+          'eval2_group_seq' => $config_eval2_tmp['group_seq'],
+          'eval2_upper_name' => $config_eval2_tmp['group_name']
+        );        
+    }
   }
 
   $eval_conjunction_policy = $config_eval['policy']['MD']['EVAL_CALC_TYPE']['value'];
@@ -188,16 +198,16 @@ function getEval1NamesArray($configEvalItemM1, $ev1Seq) {
 }
 
 function getEval2Names($ev2s, $configEval) {
-  $rtn = array(); $_c;
-  if(empty($ev2s)) return $rtn; 
-  foreach($ev2s as $vk => $vv) {
-    $_c = $configEval['item']['AT_M2'][$vv['eval2_seq']];
-    if (!$_c) continue;
-    if (equals($_c['group_isAuto'], 'Y')) { // 자동
-      $rtn['eva_' . $vv['eval2_group_seq']] = $vv['eval2_name'];
-    } else { // 수동2
-      $rtn['ev2_' . $vv['eval2_group_seq']] = $vv['eval2_name'];
+    $rtn = array(); $_c;
+    if(empty($ev2s)) return $rtn; 
+    foreach($ev2s as $vk => $vv) {
+        $_c = $configEval['item']['AT_M2'][$vv['eval2_seq']];
+        if (!$_c) continue;
+        if (equals($_c['group_isAuto'], 'Y')) { // 자동
+            $rtn['eva_' . $vv['eval2_group_seq']] = $vv['eval2_name'];
+        } else { // 수동2
+            $rtn['ev2_' . $vv['eval2_group_seq']] = $vv['eval2_name'];
+        }
     }
-  }
-  return $rtn;
+    return $rtn;
 }

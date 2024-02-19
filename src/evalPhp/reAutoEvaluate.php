@@ -3,12 +3,14 @@ include_once __DIR__ . '/common.php';
 include_once __DIR__ . '/ClassPage.php';
 include_once __DIR__ . '/ClassStat.php';
 require_once __DIR__ . "/ClassSearch.php";
+include_once __DIR__ . '/ClassTypeUtil.php';
 require_once __DIR__ . '/autoEvaluate.php';
 include_once __DIR__ . '/getConfigEval.php';
 include_once __DIR__ . '/calcArticleValue.php';
 include_once __DIR__ . '/columnSettingFunc.php';
 
 $evaluationSeq = $_REQUEST['evaluationSeq'];
+
 if (!is_numeric($evaluationSeq) || $evaluationSeq < 0) {
     if ($message) $rtn_meta['msg'] = $message;
     $rtn_meta['pid'] = $premiumID;
@@ -25,7 +27,6 @@ $ClassSearch = new ClassSearch($premiumID);
 $columnSetting = getColumnSetting($db, 'WEB');
 $columnSetting = $columnSetting['final'];
 //검색조건 받기----------------------------------------------------------------------------
-//dbconn
 $db_conn = $ClassSearch->getDBConn();
 
 //query-------------------------------------------------------------------------------
@@ -89,9 +90,6 @@ $query_delete = "
     		".$evaluationSeq."
     	)
     )
-    AND hnp_news_seq IN (
-    	".implode(',',$news_id_arr)."
-    )
 ";
 mysqli_query($db_conn, $query_delete) or die(mysqli_error($db_conn) . ' E001-E');
 
@@ -123,6 +121,11 @@ while ($row = mysqli_fetch_assoc($list)) {
 */
 
 // 자동평가 생성
-echo json_encode(autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $evaluationSeq));
-
+if(intval($evaluationSeq) == 7) {
+    $ctu = new ClassTypeUtil($db_conn);
+    $ctu->classTypeAutoEvaluation(null, null, null);
+    $ctu->InsertClassType();
+} else {
+    echo json_encode(autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $evaluationSeq));    
+}
 exit;

@@ -26,15 +26,26 @@ $result = mysqli_query($db_conn, $sql) or die(array('success'=>false,'message'=>
 }*/
 $evalClassify = array();
 while ($row = mysqli_fetch_assoc($result)){
-    $rowArray = array(
-        "seq" => $row['seq'],
-        "name" =>  $row['value'],
-        "score" =>  $row['score'],
-        "order" =>  $row['order'],
-        "upperSeq" =>  $row['evaluation_seq'],
-        "refValue" =>  $row['refValue'],
-        "use" =>  $row['isUse'],
-    );
+    if ($row['evaluation_seq'] == "7") 
+        $rowArray = array(
+            "seq" => $row['seq'],
+            "name" =>  $row['refValue']. "-" .$row['value'],
+            "score" =>  $row['score'],
+            "order" =>  $row['order'],
+            "upperSeq" =>  $row['evaluation_seq'],
+            "refValue" =>  $row['refValue'],
+            "use" =>  $row['isUse'],
+        );
+    else 
+        $rowArray = array(
+            "seq" => $row['seq'],
+            "name" =>  $row['value'],
+            "score" =>  $row['score'],
+            "order" =>  $row['order'],
+            "upperSeq" =>  $row['evaluation_seq'],
+            "refValue" =>  $row['refValue'],
+            "use" =>  $row['isUse'],
+        );
     array_push($evalClassify, $rowArray);
 }
 
