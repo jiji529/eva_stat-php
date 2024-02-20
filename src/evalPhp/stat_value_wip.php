@@ -85,10 +85,6 @@ $query_auto .= "AND `hcate`.`isUse` = '0' ";
 
 $subQuery = '';
 
-//ClassType---------------------------------------------------------------------------
-//대소제목 자동평가 준비
-$ctu->classTypeAutoEvaluation($startDate, $endDate, $news_me);
-
 /**
  * 날짜 범위
  */
@@ -317,32 +313,36 @@ if ($notKeyword) {
 //     }
 // }
 
+// 자동평가 준비 - news_id [2024-02-20 삭제]
+// logs('stat.queryAuto : ' . $query_auto);
+// $db->Query($query_auto);
+// if ($db->Error()) {
+//     $result["success"] = false;
+//     $result['notice_code'] = $db->ErrorNumber();
+//     $result['notice_message'] = $db->Error();
+//     $db->Close();
+//     echo json_encode($result);
+//     exit;
+// } else {
+//     $news_id_cnt = 0; $news_id_arr = array();
+//     while ($row = mysqli_fetch_array($db->Records(), MYSQLI_ASSOC)) {
+//         if ($news_id_cnt < 65535) {
+//             $news_id_arr[] = $row['news_id'];
+//             $news_id_cnt++;
+//         }
+//     }
+// }
+
+
+/* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+$news_id_arr = $ctu->classTypeAutoEvaluation($startDate, $endDate, $news_me);
+
 // 공통 설정
 $config_eval = getConfigEval($db);
 if (!$config_eval) {
     $result['success'] = false;
     $result['message'] = 'config_eval error';
     exit(json_encode($result));
-}
-
-// 자동평가 준비 - news_id
-logs('stat.queryAuto : ' . $query_auto);
-$db->Query($query_auto);
-if ($db->Error()) {
-    $result["success"] = false;
-    $result['notice_code'] = $db->ErrorNumber();
-    $result['notice_message'] = $db->Error();
-    $db->Close();
-    echo json_encode($result);
-    exit;
-} else {
-    $news_id_cnt = 0; $news_id_arr = array();
-    while ($row = mysqli_fetch_array($db->Records(), MYSQLI_ASSOC)) {
-        if ($news_id_cnt < 65535) {
-            $news_id_arr[] = $row['news_id'];
-            $news_id_cnt++;
-        }
-    }
 }
 
 // 자동평가 생성

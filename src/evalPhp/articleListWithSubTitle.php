@@ -49,6 +49,20 @@ while ($row = mysqli_fetch_assoc($query_result))
     }
 }
 
+// 자동평가 준비 - news_id [2024-02-20 삭제]
+// $query_auto = "SELECT `news_id`, `news_title`, `classType`, `scrapBookNo` FROM `hnp_news` WHERE `scrapBookNo` = ${scrapBookNo} AND `articleSequence` = 0";
+// $result_auto = mysqli_query($db_conn, $query_auto) or die(mysqli_error($db_conn) . ' E001-0');
+// $news_id_cnt = 0; $news_id_arr = array();
+// while ($row = mysqli_fetch_assoc($result_auto)) {
+//     if ($news_id_cnt < 65535) {
+//         $news_id_arr[] = $row['news_id'];
+//         $news_id_cnt++;
+//     }
+// }
+
+/* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+$news_id_arr = $ctu->classTypeAutoEvaluation($scrapDate, $scrapDate, $newsMe);
+
 // 공통 설정
 $config_eval = getConfigEval($db);
 if (!$config_eval) {
@@ -56,19 +70,6 @@ if (!$config_eval) {
     $result['message'] = 'config_eval error';
     exit(json_encode($result));
 }
-
-// 자동평가 준비 - news_id
-$query_auto = "SELECT `news_id`, `news_title`, `classType`, `scrapBookNo` FROM `hnp_news` WHERE `scrapBookNo` = ${scrapBookNo} AND `articleSequence` = 0";
-$result_auto = mysqli_query($db_conn, $query_auto) or die(mysqli_error($db_conn) . ' E001-0');
-$news_id_cnt = 0; $news_id_arr = array();
-while ($row = mysqli_fetch_assoc($result_auto)) {
-    if ($news_id_cnt < 65535) {
-        $news_id_arr[] = $row['news_id'];
-        $news_id_cnt++;
-    }
-}
-// 대소제목 자동평가 준비
-$ctu->classTypeAutoEvaluation($scrapDate, $scrapDate, $newsMe);
 
 // 자동평가 생성
 $ck = autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, -1);

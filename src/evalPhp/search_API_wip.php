@@ -96,10 +96,6 @@ $remove_news_serial = $_REQUEST['remove_news_serial'];
 if (!$year && (!$sDate || !$eDate)) exit;
 // if ($limit_back > 50) exit;
 
-//ClassType---------------------------------------------------------------------------
-//대소제목 자동평가 준비
-$ctu->classTypeAutoEvaluation($sDate, $eDate, $news_me);
-
 //query-------------------------------------------------------------------------------
 $query = "";
 $query1 = "SELECT * FROM (SELECT distinct ";
@@ -139,35 +135,50 @@ $searchInfo = array();
 //1.날짜
 //년/월.일
 $subQueryDates = '';
+$news_id_arr = null;
 switch($dateStand) {
     case "0":
         // $query2 .= " AND substr(hnews.news_date,1,4)='{$year}' ";
         // $subQueryDates = " AND substr(SB.scrapDate,1,4)='{$year}' ";
         $subQueryDates = " AND `SB`.`scrapDate` BETWEEN '{$year}-01-01' AND '{$year}-12-31' ";
-        $searchInfo['date'] = "연간:" . $year; break;
+        $searchInfo['date'] = "연간:" . $year; 
+        /* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+        $news_id_arr = $ctu->classTypeAutoEvaluation("{$year}-01-01", "{$year}-12-31", ($news_me===false?"-1":$news_me));
+        break;
     case "1":
         $month = $month < 10 ? '0'.$month : $month;
         $day = $day < 10 ? '0'.$day : $day;
         // $query2 .= " AND substr(hnews.news_date,1,7)='{$year}-{$month}' ";
         // $subQueryDates = " AND substr(SB.scrapDate,1,7)='{$year}-{$month}' ";
         $subQueryDates = " AND `SB`.`scrapDate` BETWEEN '{$year}-{$month}-01' AND '{$year}-{$month}-31' ";
-        $searchInfo['date'] = "월간:" . $year . "-" . $month; break;
+        $searchInfo['date'] = "월간:" . $year . "-" . $month; 
+        /* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+        $news_id_arr = $ctu->classTypeAutoEvaluation("{$year}-{$month}-01", "{$year}-{$month}-31", ($news_me===false?"-1":$news_me));
+        break;
     case "2":
         $month = $month < 10 ? '0'.$month : $month;
         $day = $day < 10 ? '0'.$day : $day;
         // $query2 .= " AND hnews.news_date = '{$year}-{$month}-{$day}' ";
         $subQueryDates = " AND `SB`.`scrapDate` = '{$year}-{$month}-{$day}' ";
+        /* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+        $news_id_arr = $ctu->classTypeAutoEvaluation("{$year}-{$month}-{$day}", "{$year}-{$month}-{$day}", ($news_me===false?"-1":$news_me));
         break;
     case "3":
         // $query2 .= " AND hnews.news_date BETWEEN DATE('{$sDate}') AND DATE('{$eDate}') ";
         // $subQueryDates = " AND SB.scrapDate BETWEEN DATE('{$sDate}') AND DATE('{$eDate}') ";
         $subQueryDates = " AND `SB`.`scrapDate` BETWEEN DATE('{$sDate}') AND DATE('{$eDate}') ";
-        $searchInfo['date'] = "지정:" . $sDate . "~" . $eDate; break;
+        $searchInfo['date'] = "지정:" . $sDate . "~" . $eDate; 
+        /* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+        $news_id_arr = $ctu->classTypeAutoEvaluation($sDate, $eDate, ($news_me===false?"-1":$news_me));
+        break;
     default :
         // $query2 .= " AND substr(hnews.news_date,1,4)='{$year}' ";
         // $subQueryDates = " AND substr(SB.scrapDate,1,4)='{$year}' ";
         $subQueryDates = " AND `SB`.`scrapDate` BETWEEN '{$year}-01-01' AND '{$year}-12-31' ";
-        $searchInfo['date'] = "연간:" . $year; break;
+        $searchInfo['date'] = "연간:" . $year; 
+        /* 대소제목 자동평가 준비 및 기사 아이디(news_id) 추출 [2024-02-20 추가] */
+        $news_id_arr = $ctu->classTypeAutoEvaluation("{$year}-01-01", "{$year}-12-31", ($news_me===false?"-1":$news_me));
+        break;
 }
 $query2 .= $subQueryDates;
 
@@ -369,21 +380,22 @@ if (!is_null($con)) { /* $con이라는 변수가 존재하는지는 확인 못�
 	mysqli_set_charset($con, 'utf8');
 }
 
+
+// 자동평가 준비 - news_id [2024-02-20 삭제]
+// $query_auto = "{$query1}{$field_auto}{$table_string}{$query2}";
+// logs('search.qry_auto : ' . $query_auto);
+// $result_auto = mysqli_query($db_conn, $query_auto) or die(mysqli_error($db_conn) . ' E001-E');
+// $news_id_arr = array();
+// while ($row = mysqli_fetch_assoc($result_auto)) {
+//     $news_id_arr[] = $row['news_id'];
+// }
+
 // 공통 설정
 $config_eval = getConfigEval($db);
 if (!$config_eval) {
     $result['success'] = false;
     $result['message'] = 'config_eval error';
     exit(json_encode($result));
-}
-
-// 자동평가 준비 - news_id
-$query_auto = "{$query1}{$field_auto}{$table_string}{$query2}";
-logs('search.qry_auto : ' . $query_auto);
-$result_auto = mysqli_query($db_conn, $query_auto) or die(mysqli_error($db_conn) . ' E001-E');
-$news_id_arr = array();
-while ($row = mysqli_fetch_assoc($result_auto)) {
-    $news_id_arr[] = $row['news_id'];
 }
 
 // 자동평가 생성

@@ -31,7 +31,7 @@ class ClassTypeUtil {
      * (self::setNewEvalClassify에서도 사용)
      * @return NULL|Array
      */
-    public function getEvalClassifyList() {
+    public function getEvalClassifyList($check) {
         $SQL = "
             SELECT  `seq`,  `value`, `order`, `refValue`,  `score`,  `isUse`
             FROM `evalClassify`
@@ -40,8 +40,13 @@ class ClassTypeUtil {
         ";
         $rs = self::runSql($SQL, "SELECT ERROR");
         $list = null;
+        $checkList = null;
         while ($row = mysqli_fetch_assoc($rs)) {
             $list[] = $row;
+            $checkList[] = $row['value'];
+        }
+        if ($check) {
+            return $checkList;
         }
         return $list;
     }
@@ -66,22 +71,13 @@ class ClassTypeUtil {
         self::runSql($SQL, "UPDATE ERROR");
     }
     
-    private function delEvalClassifyList($titleList) {
-        $SQL = "
-            DELETE FROM `evalClassify`
-            WHERE `evaluation_seq` = {$this->evaluation_seq}
-            AND `value` NOT IN (". (($titleList == null) ? "''" : implode(",", $titleList)) .")
-        ";
-        self::runSql($SQL, "DELETE ERROR");
-    }
-    
     
     /**
      * self::setNewEvalClassify에서 사용되고 hnp_news에서 데이터를 찾는다.
-     * @param $titleList
+     * @param $scrapBookNo
      * @return string[]
      */
-    private function getClassTypeFromHnpNews($titleList) {
+    private function getClassTypeFromHnpNews($scrapBookNo) {
         /* hnp_news에서 미등록된 대-소제목 찾기 */
         $SQL = "
             SELECT DISTINCT `hnews`.news_title, `hnews`.classType
@@ -90,33 +86,30 @@ class ClassTypeUtil {
             LEFT JOIN `scrapBook` AS `SB` ON `SB`.`no` = `hnews`.`scrapBookNo`
             WHERE 1=1
             AND hcate.media_name IN ('대제목','소제목')
-            AND hnews.news_title NOT IN (". (($titleList == null) ? "''" : implode(",", $titleList)) .")
+            AND hnews.scrapBookNo IN (".(($scrapBookNo == null) ? "''" : implode(",", $scrapBookNo)).")
         ";
         $rs = self::runSql($SQL, "SELECT hnp_news ERROR");
         
         /* 대-소제목 등록 준비 */
         $insertValues = [];
-        $total_rows = mysqli_num_rows($rs) + ($titleList != null ? count($titleList) : 0);
         while ($row = mysqli_fetch_assoc($rs)) {
-            $total_rows++;
             $typeStr = $row['classType'] == 1 ? "대제목" : "소제목";
-            $insertValues["'".$row['news_title']."'"] = " ('{$row['news_title']}', '{$typeStr}', 1, 'Y', {$total_rows}, {$this->evaluation_seq}) ";
-            $titleList[] = "'".$row['news_title']."'";
+            $insertValues[$row['news_title']] = " ('{$row['news_title']}', '{$typeStr}', 1, 'Y', 0, {$this->evaluation_seq}) ";
         }
-        return array($insertValues, $titleList);
+        return $insertValues;
     }
     
     /**
      * self::setNewEvalClassify에서 사용되고 subtitle에서 데이터를 찾는다.
-     * @param $titleList
+     * @param $scrapBookNo
      * @return string[]
      */
-    private function getClassTypeFromSubtitle($titleList) {
+    private function getClassTypeFromSubtitle($scrapBookNo) {
         /* smallTitle에서 미등록된 대-소제목 찾기 */
         $SQL = "
             SELECT DISTINCT subtitle
             FROM subTitleInfo
-            WHERE subtitle NOT IN (".(($titleList == null) ? "''" : implode(",", $titleList)).")
+            WHERE scrapBookNo IN (".(($scrapBookNo == null) ? "''" : implode(",", $scrapBookNo)).")
         ";
         $rs = self::runSql($SQL, "SELECT subTitleInfo ERROR");
         
@@ -124,27 +117,21 @@ class ClassTypeUtil {
         $insertValues = [];
         /* $total_rows은 위에서 카운트된 데이터를 그대로 따른다. */
         while ($row = mysqli_fetch_assoc($rs)) {
-            $total_rows++;
-            $insertValues["'".$row['subtitle']."'"] = " ('{$row['subtitle']}', '소제목', 1, 'Y', {$total_rows}, {$this->evaluation_seq}) ";
-            $titleList[] = "'".$row['subtitle']."'";
+            $insertValues[$row['subtitle']] = " ('{$row['subtitle']}', '소제목', 1, 'Y', 0, {$this->evaluation_seq}) ";
         }
-        return array($insertValues, $titleList);
+        return $insertValues;
     }
     
     /**
      * 평가통계 초기 진입 시, 새로 추가할 대-소제목을 찾아 evalclassify에 등록한다. 
      * @return boolean
      */
-    public function setNewEvalClassify() {
-        /* 등록된 데이터를 통헤 미등록 데이터를 준비한다. */
-        $insertDataAndTitleList = self::getClassTypeFromHnpNews(null);
-        $insertDataAndTitleList2 = self::getClassTypeFromSubtitle($insertDataAndTitleList[1]);
-        $insertData = array_merge($insertDataAndTitleList[0], $insertDataAndTitleList2[0]);
-        $titleList = $insertDataAndTitleList2[1];
-        
-        self::delEvalClassifyList($titleList);
-        
-        $oldList = self::getEvalClassifyList();
+    private function setNewEvalClassify($scrapBookNo) {
+        $insertData1 = self::getClassTypeFromHnpNews($scrapBookNo);
+        $insertData2 = self::getClassTypeFromSubtitle($scrapBookNo);
+        $insertData = array_merge($insertData1, $insertData2);
+        $oldList = self::getEvalClassifyList(true);
+
         $result = null;
         if ($insertData != null) {
             foreach ($insertData as $key => $value) {
@@ -188,14 +175,18 @@ class ClassTypeUtil {
                 ORDER BY news_id ASC
             ";
         }
-        $resultSet = self::runSql($SQL, "Article Error");
+        $resultSet = self::runSql($SQL, "Get article error");
+        
         $articles = array();
         $newsIdArr = array();
+        $scrapBookNo = array();
         while ($row = mysqli_fetch_assoc($resultSet)) {
             $articles[] = $row;
             $newsIdArr[] = $row["news_id"];
+            if (!in_array($row["scrapBookNo"], $scrapBookNo)) 
+                $scrapBookNo[] = $row["scrapBookNo"];
         } 
-        return array($articles, $newsIdArr);
+        return array($articles, $newsIdArr, $scrapBookNo);
     }
     
     private function getClassTypeList() {
@@ -262,13 +253,18 @@ class ClassTypeUtil {
         $info = self::getArticleList($scrapDateStart, $scrapDateEnd, $newsMe);
         $articles = $info[0];
         $newsIdArr = $info[1];
+        $scrapBookNo = $info[2];
+        
+        /* (새) 대-소제목 데이터 삽입 */
+        self::setNewEvalClassify($scrapBookNo);
 
-        /* 등록된 대-소제목 불러오기 */
+        /* 대-소제목 불러오기 */
         $evalClassifyList = self::getClassTypeList();
         
-        /* subTitleInfo */
+        /* 소제목 불러오기 */
         $titleInfo = self::getSubtitleList($scrapDateStart, $scrapDateEnd);
         
+        /* 중복 평가 검증 */
         $evaluatedNewsId = self::getEvaluatedItem($newsIdArr);
         
         /* 기사 대-소제목 자동평가 */
@@ -305,16 +301,20 @@ class ClassTypeUtil {
         } //foreach
         
         $this->insertArrData = $insArrData;
-        return true;
+        return $newsIdArr;
     }
     
     public function InsertClassType() {
         if (count($this->insertArrData) < 1) return false;
-        $SQL = "
-            INSERT INTO `newsEval` (`evalClassify_seq`, `hnp_news_seq`)  
-            VALUES " .implode(',', $this->insertArrData). "  
-        ";
-        self::runSql($SQL, "INSERT ERROR");
+        
+        $fullArr = array_chunk($this->insertArrData, 10000);
+        foreach ($fullArr as $partArr) {
+            $SQL = "
+                INSERT INTO `newsEval` (`evalClassify_seq`, `hnp_news_seq`)  
+                VALUES " .implode(',', $partArr). "  
+            ";
+            self::runSql($SQL, "INSERT ERROR");            
+        }
         return true;
     }
     
