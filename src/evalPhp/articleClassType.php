@@ -10,7 +10,7 @@ $db_conn = $ClassSearch->getDBConn();
 
 $ctu = new ClassTypeUtil($db_conn);
 /* 수정 전, DB 데이터 */
-$resultList = $ctu->getEvalClassifyList();
+$resultList = $ctu->getEvalClassifyList(false);
 if (is_array($resultList) && $evalConfigArr && count($evalConfigArr) > 0) {
     /* 검증 데이터 */
     $prevList = array();
@@ -27,7 +27,7 @@ if (is_array($resultList) && $evalConfigArr && count($evalConfigArr) > 0) {
     }
     
     /* 수정 후, DB 데이터 */
-    $resultList = $ctu->getEvalClassifyList();
+    $resultList = $ctu->getEvalClassifyList(false);
 }
 echo json_encode($resultList);
 exit;
