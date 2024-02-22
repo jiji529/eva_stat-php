@@ -7,7 +7,7 @@ include_once __DIR__ . '/dbConn.php';
 //인자받기
 $eval1 = $_REQUEST['eval1'];
 $eval1Change = $_REQUEST['eval1Change'];
-$eval2 = $_REQUEST['eval2'];
+$eval2 = $_REQUEST['eval2']; 
 $eval2Change = $_REQUEST['eval2Change'];
 $news_id = $_REQUEST['news_id'];
 $autoCateSubSeq = $_REQUEST['autoCateSubSeq'];
@@ -37,27 +37,25 @@ if(!is_array($news_id)) {
 $news_id_string = implode(",", $news_id_arr);
 
 $affected_row_count_by_update = 0;
-if($eval1Change){
+if($eval1Change == "true"){
     if($eval1) {
         $sql = "UPDATE hnp_news SET category_seq = {$eval1} WHERE news_id IN({$news_id_string})";
     } else {
         $sql = "UPDATE hnp_news SET category_seq = null WHERE news_id IN({$news_id_string})";
     }
+    $result = mysqli_query($db_conn, $sql);
+    if(! $result ) {
+        $error = array(
+            "error_code" => "E001-1",
+            "error_message" => urlencode("Incorrect main-query request (잘못된 쿼리요청입니다.)"),
+        );
+        echo urldecode(json_encode($error));
+        exit;
+    }
+    
+    $affected_row_count_by_update += mysqli_affected_rows($db_conn);
+    $rs["affected rows (update) - eval1"] = $affected_row_count_by_update;
 }
-
-
-$result = mysqli_query($db_conn, $sql);
-if(! $result ) {
-    $error = array(
-        "error_code" => "E001-1",
-        "error_message" => urlencode("Incorrect main-query request (잘못된 쿼리요청입니다.)"),
-    );
-    echo urldecode(json_encode($error));
-    exit;
-}
-
-$affected_row_count_by_update += mysqli_affected_rows($db_conn);
-$rs["affected rows (update) - eval1"] = $affected_row_count_by_update;
 
 
 /** eval2저장 **/
@@ -73,7 +71,6 @@ if($eval2Change) {
 //해당 news_id의 eval2 값 삭제
     $delete = "DELETE FROM newsEval WHERE hnp_news_seq IN ({$news_id_string}) AND evalClassify_seq not in ({$autoCateSubSeq}) ";
 
-    
     $result = mysqli_query($db_conn, $delete);
     if (!$result) {
         $error = array(
@@ -86,7 +83,7 @@ if($eval2Change) {
     $affected_row_count_by_delete += mysqli_affected_rows($db_conn);
 
     $affected_row_count_by_insert = 0;
-    if ($eval2) {
+    if ($eval2 != "") {
         $insert = "INSERT INTO newsEval (evalClassify_seq, hnp_news_seq) VALUES ";
         foreach ($news_id_arr as $id_key => $id_one) {
             foreach ($eval2_arr as $eval_key => $eval2_one) {

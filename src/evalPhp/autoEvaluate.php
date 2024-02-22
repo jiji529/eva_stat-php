@@ -23,6 +23,7 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $reEvaluation
             } else {
                 $sorted_gi_config = array();
                 for ($i = 1; $i <= 6; $i++) {
+                    if ($config_eval['group_item'][$i] == null) continue;
                     foreach($config_eval['group_item'][$i] as $v) {
                         if ($v['isUse'] === 'Y')
                             $sorted_gi_config[$i][] = $v;
