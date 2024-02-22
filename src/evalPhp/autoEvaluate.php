@@ -141,7 +141,7 @@ function autoEvaluate($db, $config_eval, $news_id_arr, $premiumID, $reEvaluation
                           LEFT JOIN `hnp_category` ON `hnp_category`.`media_id` = `hnp_news`.`media_id`
                           LEFT JOIN `mediaGroup` ON `mediaGroup`.`hnp_category_media_id` = `hnp_news`.`media_id`
                           LEFT JOIN `reporterGroup` ON `reporterGroup`.`hnp_category_media_id` = `hnp_news`.`media_id`
-                          AND `hnp_news`.`news_reporter` LIKE CONCAT('%',    `reporterGroup`.`reporterName`, '%') AND `reporterGroup`.`isUse` = 'Y'
+                          AND `hnp_news`.`news_reporter` = `reporterGroup`.`reporterName` AND `reporterGroup`.`isUse` = 'Y'
                           LEFT JOIN `newsEval` ON `newsEval`.`hnp_news_seq` = `hnp_news`.`news_id`
                           LEFT JOIN `evalClassify` AS `eval2` ON `eval2`.`seq` = `newsEval`.`evalClassify_seq` ";
                         $query_fetch .= " WHERE 1=1 ";
